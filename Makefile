@@ -8,8 +8,8 @@ build: Dockerfile requirements.txt
 .PRECIOUS: *.py
 FORCE:
 
-shell: src/shell.py FORCE
-	echo "Done"
-
 src/%.py: FORCE
-	docker run -it -v "$$(pwd)/data":/home/user/OSV/data -v "$$(pwd)/src":/home/user/OSV/src $(DOCKER_IMAGE_NAME) python -u $@ $(args)
+	clear
+	@docker run -it -v "$$(pwd)/data":/home/user/OSV/data -v "$$(pwd)/src":/home/user/OSV/src $(DOCKER_IMAGE_NAME) python -u $@ $(args)
+
+shell: build src/shell.py
