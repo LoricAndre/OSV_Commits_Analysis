@@ -33,7 +33,7 @@ to_csv() {
   fin=${a[@]::$nargs-1}
   fout=${a[$nargs-1]}
   make_headers $fout
-  jq --raw-output '[.id, .aliases[0], .modified, .published] + (.affected[] | [.package.name, .package.ecosystem] + (.ranges[] | [.type] + (.events | [map(select(has("introduced")).introduced), map(select(has("fixed")).fixed)] | transpose[0]))) | @csv' $fin >> $fout
+  jq --raw-output '[.id, .aliases[0], .modified, .published] + (.affected[] | [.package.name, .package.ecosystem] + (.ranges[] | [.type] + (.events | [map(select(has("introduced")).introduced), map(select(has("fixed") or has("limit")) | .fixed + .limit )] | transpose[0]))) | @csv' $fin >> $fout
 }
 
 make_headers() {
@@ -41,5 +41,5 @@ make_headers() {
   echo "id,CVE,Modification Date,Publication Date,Package Name,Ecosystem,Type,Start,End" > $fout
 }
 
-# fetch ${ECOSYSTEMS[@]}
-to_csv Data/*.json all.csv
+# cd data/osv && fetch ${ECOSYSTEMS[@]}; cd -
+to_csv data/osv/*.json all.csv

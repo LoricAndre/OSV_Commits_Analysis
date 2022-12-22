@@ -1,1 +1,3 @@
-Data/
+data/*.csv
+data/*.parquet
+data/osv/*.json
