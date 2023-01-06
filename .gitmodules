@@ -1,0 +1,3 @@
+[submodule "swh-graph"]
+	path = swh-graph
+	url = git@github.com:SoftwareHeritage/swh-graph.git
