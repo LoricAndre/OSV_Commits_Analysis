@@ -3,3 +3,7 @@ python-snappy
 pandas
 tqdm
 dill
+
+multiprocess
+grpcio
+swh.graph
