@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
+
 from swh import CommitGraph
 from utils import DDict
 from osv import OSV
+
 from glob import glob
 from cmd import Cmd
 import json
@@ -52,14 +54,14 @@ By default, runs python code. If prepended by `!`, run as a system command.
         pass
 
     def do_graph(self, file):
-        'Load graph from parquet file'
+        'Load graph from parquet file in `data` dir'
         def fn():
             self.graph_file = file
             self.g = CommitGraph.loadf("data/%s" % file)
         return self._wrap(fn)
 
     def do_vulns(self, file):
-        'Load vulnerability list from csv file'
+        'Load vulnerability list from csv file in `data` dir'
         def fn():
             self.vuln_file = file
             self.vulns = OSV("data/%s" % file)
@@ -78,10 +80,10 @@ By default, runs python code. If prepended by `!`, run as a system command.
                     raise Exception("Unknown data type %s" % file)
         return self._wrap(fn)
 
-    def do_save_vulns(self, file):
-        'Save vulnerabilities dictionary to JSON file'
+    def do_save(self, file):
+        'Save vulnerabilities dictionary to JSON file in `data` dir'
         def fn():
-            with open(file, "w") as f:
+            with open("data/%s" % file, "w") as f:
                 json.dump(self.g.vulns, f)
         return self._wrap(fn)
 

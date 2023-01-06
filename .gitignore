@@ -1,5 +1,7 @@
 data/*.csv
 data/*.parquet
 data/osv/*.json
+!data/osv
+data/*/
 __pycache__/
 src/__pycache__/

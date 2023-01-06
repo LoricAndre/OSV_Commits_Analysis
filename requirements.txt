@@ -7,3 +7,4 @@ dill
 multiprocess
 grpcio
 swh.graph
+pyarrow
