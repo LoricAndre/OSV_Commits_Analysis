@@ -38,4 +38,4 @@ shell: build src/shell.py
 
 data/%/graph:
 	cd swh-graph/java/target
-	java -cp swh-graph-2.3.0.jar org.softwareheritage.graph.rpc.GraphServer ../../../$@
+	java -Xmx12G -cp swh-graph-2.3.0.jar org.softwareheritage.graph.rpc.GraphServer ../../../$@
