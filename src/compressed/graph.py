@@ -68,24 +68,22 @@ class SQLCon:
 
 
 def color_nodes(nodes, uid, db, table="vulns"):
-    print("b")
-    db.em("insert into %s values (?, '%s')" % (table, uid), zip(nodes))
+    # print(len(*zip(nodes)))
+    # db.em("insert into %s values (?, '%s')" % (table, uid), zip(nodes))
 
-    # items = ["('%s','%s')" % (node, uid) for node in nodes]
-    # if items:
-    #     q = "insert into %s (sha, uid) values " % table
-    #     q += ",".join(items)
-    #     try:
-    #         db.e(q)
-    #     except Exception as e:
-    #         print("Error executing query", q)
-    #         raise e
+    for node in tqdm(nodes):
+        q = "insert into %s (sha, uid) values ('%s', '%s')" % (table, node, uid)
+        try:
+            db.e(q)
+        except Exception as e:
+            print("Error executing query", q)
+            raise e
 
 
 def uncolor_nodes(nodes, uid, db):
-    # db.e("delete from vulns where uid='%s' and sha in ('%s')",
-    #      uid, "','".join(nodes))
-    db.em("delete from vulns where uid='%s' and sha in (?)" % uid, zip(nodes))
+    db.e("delete from vulns where uid='%s' and sha in ('%s')",
+         uid, "','".join(nodes))
+    # db.em("delete from vulns where uid='%s' and sha in (?)" % uid, zip(nodes))
 
 
 def insert_items(items, db, table="vulns"):
