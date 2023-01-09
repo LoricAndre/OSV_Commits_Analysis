@@ -79,9 +79,9 @@ def color_nodes(nodes, uid, db, table="vulns"):
 
 
 def uncolor_nodes(nodes, uid, db):
-    # db.e("delete from vulns where uid='%s' and sha in ('%s')",
-    #      uid, "','".join(nodes))
-    db.em("delete from vulns where uid='%s' and sha in (?)" % uid, zip(nodes))
+    db.e("delete from vulns where uid='%s' and sha in ('%s')",
+         uid, "','".join(nodes))
+    # db.em("delete from vulns where uid='%s' and sha in (?)" % uid, zip(nodes))
 
 
 def insert_items(items, db, table="vulns"):
