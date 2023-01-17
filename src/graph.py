@@ -12,7 +12,6 @@ HOST = env.get("GPRC_HOST", "localhost")
 PORT = env.get("GRPC_PORT", "50091")
 DBPATH = env.get("DB_PATH", "data/swh.db")
 THREADS = int(env.get("THREADS", min(32, cpu_count())))
-print(THREADS)
 
 log.basicConfig(
     format='(%(name)s) - [%(levelname)s] %(message)s', level=log.INFO)
@@ -20,6 +19,7 @@ log.basicConfig(
 
 def main():
     log.info("Using DB at %s and gRPC server at %s:%s", DBPATH, HOST, PORT)
+    log.info("Running using %d threads.", THREADS)
     db = SQLCon(DBPATH)
     client = GraphClient(HOST, PORT)
     try:
