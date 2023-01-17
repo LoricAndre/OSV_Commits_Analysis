@@ -1,6 +1,15 @@
-DOCKER_IMAGE_NAME := osv_py
-CSV_FILE := data/osv.csv
-DB_FILE := data/swh.db
+ifndef DOCKER_IMAGE_NAME
+	DOCKER_IMAGE_NAME := osv_py
+endif
+ifndef USE_DOCKER
+	USE_DOCKER = true
+endif
+ifndef CSV_FILE
+	CSV_FILE := data/osv.csv
+endif
+ifndef DB_FILE
+	DB_FILE := data/swh.db
+endif
 
 .PHONY: build requirements
 
@@ -15,8 +24,15 @@ FORCE:
 
 .ONESHELL:
 src/%.py: FORCE data/osv.csv
-	clear
-	@docker run -it -v "$$(pwd)/data":/home/user/OSV/data -v "$$(pwd)/src":/home/user/OSV/src $(DOCKER_IMAGE_NAME) python -u $@ $(args)
+	if $(USE_DOCKER); then
+		clear
+		echo "Running in docker"
+		echo "$(USE_DOCKER)"
+		@docker run -it -v "$$(pwd)/data":/home/user/OSV/data -v "$$(pwd)/src":/home/user/OSV/src $(DOCKER_IMAGE_NAME) python -u $@ $(args)
+	else
+		clear
+		@python3 -u $@ $(args)
+	fi
 
 # Shell
 shell: build src/shell.py
