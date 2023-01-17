@@ -3,7 +3,7 @@ import parquet
 import graph_tool as gt
 from graph_tool import topology, search
 from tqdm import tqdm
-from utils import DDict
+from utils.ddict import DDict
 import logging as log
 import pickle
 from binascii import b2a_hex

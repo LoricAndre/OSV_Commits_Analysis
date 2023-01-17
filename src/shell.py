@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-from swh import CommitGraph
-from utils import DDict
-from osv import OSV
+from utils.pq_graph import CommitGraph
+from utils.ddict import DDict
+from utils.osv_csv import OSV
 
 from glob import glob
 from cmd import Cmd
