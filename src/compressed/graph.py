@@ -130,8 +130,8 @@ def main():
             items = db.e(
                 "select start, end, id from OSV where type = 'GIT' and start != '0' and end != 0")
             for start, end, uid in tqdm(items):
-                color_nodes(client.descendants([start]), uid, db)
-                uncolor_nodes(client.descendants([end]), uid, db)
+                color_nodes(set(client.descendants([start])) - set(client.descendants([end])), uid, db)
+                # uncolor_nodes(client.descendants([end]), uid, db)
             db.commit()
 
         except KeyboardInterrupt:
