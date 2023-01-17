@@ -26,7 +26,7 @@ colorize: $(DB_FILE) src/graph.py
 
 # Pull OSV data and create CSV file
 $(CSV_FILE):
-	./fetch.sh $(CSV_FILE)
+	./src/fetch.sh $(CSV_FILE)
 
 # Create DB file from CSV
 $(DB_FILE): $(CSV_FILE)
