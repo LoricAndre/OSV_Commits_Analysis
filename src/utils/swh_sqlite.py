@@ -23,8 +23,8 @@ class SQLCon:
 
     def color_nodes(self, nodes, uid):
         self.em("insert into %s values (?, '%s')" % (self.vuln_table, uid), zip(nodes))
+        return 0
 
     def uncolor_nodes(self, nodes, uid):
         self.em("delete from %s where uid='%s' and sha=?" % (self.vuln_table, uid), zip(nodes))
-
-
+        return 0

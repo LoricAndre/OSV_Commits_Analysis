@@ -2,6 +2,7 @@ parquet
 python-snappy
 pandas
 tqdm
+pqdm
 dill
 
 multiprocess
