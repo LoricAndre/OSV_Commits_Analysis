@@ -2,13 +2,13 @@ ifndef DOCKER_IMAGE_NAME
 	DOCKER_IMAGE_NAME := osv_py
 endif
 ifndef USE_DOCKER
-	USE_DOCKER := true
+	USE_DOCKER := false
 endif
-ifndef CSV_FILE
-	CSV_FILE := data/osv.csv
+ifndef CSV_PATH
+	CSV_PATH := data/osv.csv
 endif
-ifndef DB_FILE
-	DB_FILE := data/swh.db
+ifndef DB_PATH
+	DB_PATH := data/swh.db
 endif
 
 .PHONY: build requirements
@@ -38,14 +38,15 @@ src/%.py: FORCE data/osv.csv
 shell: build src/shell.py
 
 # graph.py
-colorize: $(DB_FILE) src/graph.py
+colorize: $(DB_PATH) src/graph.py
 
 # Pull OSV data and create CSV file
-$(CSV_FILE):
+$(CSV_PATH):
 	./src/fetch.sh $(CSV_FILE)
 
 # Create DB file from CSV
-$(DB_FILE): $(CSV_FILE)
+$(DB_PATH): $(CSV_PATH)
+	rm $(DB_PATH)
 	sqlite3 --csv $@ ".import $< OSV"
 
 
