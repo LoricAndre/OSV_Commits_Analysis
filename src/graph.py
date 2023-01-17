@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from os import environ as env
 from tqdm import tqdm
 import logging as log

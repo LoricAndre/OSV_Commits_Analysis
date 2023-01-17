@@ -1,22 +1,11 @@
-ifndef $(GRPC_PORT)
-	GRPC_PORT := 50091
-endif
-ifndef $(GRPC_HOST)
-	GRPC_HOST := localhost
-endif
-ifndef $(USE_DOCKER)
-	USE_DOCKER := false
-endif
-ifndef $(SWH_CONFIG)
-	SWH_CONFIG := swh
-endif
-
 DOCKER_IMAGE_NAME := osv_py
+CSV_FILE := data/osv.csv
+DB_FILE := data/swh.db
 
 .PHONY: build requirements
 
 build: Dockerfile requirements.txt
-	docker build -t $(DOCKER_IMAGE_NAME) .
+	docker build -t $(DOCKER_IMAGE_NAME) --network=host .
 
 requirements: requirements.txt
 	python3 -m pip install -r requirements.txt
@@ -25,17 +14,20 @@ requirements: requirements.txt
 FORCE:
 
 .ONESHELL:
-src/%.py: FORCE
-	if $(USE_DOCKER); then
-		clear
-		@docker run -it -v "$$(pwd)/data":/home/user/OSV/data -v "$$(pwd)/src":/home/user/OSV/src $(DOCKER_IMAGE_NAME) python -u $@ $(args)
-	else
-		clear
-		@python -u $@ $(args)
-	fi
+src/%.py: FORCE data/osv.csv
+	clear
+	@docker run -it -v "$$(pwd)/data":/home/user/OSV/data -v "$$(pwd)/src":/home/user/OSV/src $(DOCKER_IMAGE_NAME) python -u $@ $(args)
 
+# Shell
 shell: build src/shell.py
 
-data/%/graph:
-	cd swh-graph/java/target
-	java -Xmx12G -cp swh-graph-2.3.0.jar org.softwareheritage.graph.rpc.GraphServer ../../../$@
+# graph.py
+colorize: $(DB_FILE) src/graph.py
+
+# Pull OSV data and create CSV file
+$(CSV_FILE):
+	./fetch.sh $(CSV_FILE)
+
+# Create DB file from CSV
+$(DB_FILE): $(CSV_FILE)
+	sqlite3 --csv $@ ".import $< OSV"

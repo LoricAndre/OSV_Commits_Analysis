@@ -1,7 +1,39 @@
 OSV.dev analysis
 ===
 
-# TL;DR
+## Setup
+
+### Data
+
+Run `make data/swh.db` to fetch the data from OSV and add it to the database, creating a csv file at `data/osv.csv`.
+
+### `graph-tool`
+#### Shell
+The shell is used to colorize graphs using parquet file and is not optimized for large graphs.
+
+#### Requirements
+The shell and more specifically `utils/pq_graph.py` require `graph-tool`. As this is a package not available through `pip`, a docker image is used for this module.
+
+#### Data
+The shell uses a parquet file for the commit graph and a csv for the vulnerabilities.
+
+#### Run
+To run these files, run `make build` to build the docker image, then `make shell` or `make src/xxx.py` to run it in the docker container.
+
+
+### gRPC
+#### `graph.py`
+This script will create a database of commit <-> vulnerability associations using a gRPC server and the vulnerabilities csv loaded into a sqlite table.
+
+#### Requirements
+The swh.graph module can raise errors during install, requiring `postgresql` and [cmph](https://github.com/zvelo/cmph/blob/master/INSTALL) installed.
+These packages will be installed in the docker container, but if you want to avoid using it, you need to install them yourself.
+
+#### Run
+Simply run `make colorize` or `src/graph.py`.
+
+## Stats
+
 | Request | Result | Notes |
 | - | - | - |
 | All git ranges | 14185 |
