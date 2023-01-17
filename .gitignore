@@ -1,6 +1,7 @@
 data/*.csv
 data/*.parquet
 data/osv/*.json
+data/*.db
 !data/osv
 data/*/
 __pycache__/
