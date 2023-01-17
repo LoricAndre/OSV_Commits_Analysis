@@ -2,7 +2,7 @@ ifndef DOCKER_IMAGE_NAME
 	DOCKER_IMAGE_NAME := osv_py
 endif
 ifndef USE_DOCKER
-	USE_DOCKER = true
+	USE_DOCKER := true
 endif
 ifndef CSV_FILE
 	CSV_FILE := data/osv.csv
