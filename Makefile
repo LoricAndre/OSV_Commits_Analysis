@@ -31,3 +31,7 @@ $(CSV_FILE):
 # Create DB file from CSV
 $(DB_FILE): $(CSV_FILE)
 	sqlite3 --csv $@ ".import $< OSV"
+
+
+tunnel:
+	ssh -L 50091:localhost:50091 -J $(SSH_USER)@ssh.enst.fr $(SSH_USER)@swh1.enst.fr
