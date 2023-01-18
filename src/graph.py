@@ -27,21 +27,24 @@ def main():
         items = db.e(
             "select start, id from OSV where type = 'GIT' and start != '0' and end = '0'")
 
-        pqdm(items, lambda x: db.color_nodes(client.descendants([x[0]]), x[1]), n_jobs=THREADS, exception_behaviour='immediate')
+        pqdm(items, lambda x: db.color_nodes(client.descendants(
+            [x[0]]), x[1]), n_jobs=THREADS, exception_behaviour='immediate')
         # for start, uid in tqdm(items):
         #     db.color_nodes(client.descendants([start]), uid)
         db.commit()
         log.info("Processing 0-starting ranges...")
         items = db.e(
             "select end, id from OSV where type = 'GIT' and end != '0' and start = '0'")
-        pqdm(items, lambda x: db.color_nodes(client.ancestors([x[0]]), x[1]), n_jobs=THREADS, exception_behaviour='immediate')
+        pqdm(items, lambda x: db.color_nodes(client.ancestors(
+            [x[0]]), x[1]), n_jobs=THREADS, exception_behaviour='immediate')
         # for end, uid in tqdm(items):
         #     db.color_nodes(client.ancestors([end]), uid)
         db.commit()
         log.info("Processing closed ranges...")
         items = db.e(
             "select start, end, id from OSV where type = 'GIT' and start != '0' and end != 0")
-        pqdm(items, lambda x: db.color_nodes(client.descendants([x[0]]), x[2]) + db.color_nodes(client.descendants([x[1]]), x[2]), n_jobs=THREADS, exception_behaviour='immediate')
+        pqdm(items, lambda x: db.color_nodes(client.descendants([x[0]]), x[2]) + db.color_nodes(
+            client.descendants([x[1]]), x[2]), n_jobs=THREADS, exception_behaviour='immediate')
         # for start, end, uid in tqdm(items):
         #     # db.color_nodes(set(client.descendants([start])) - set(client.descendants([end])), uid)
         #     db.color_nodes(client.descendants([start]), uid)
@@ -49,7 +52,7 @@ def main():
         db.commit()
 
     except KeyboardInterrupt:
-        log.error("Aborting...")
+        log.warning("User interrupt, aborting...")
     client.close()
     db.close()
 
