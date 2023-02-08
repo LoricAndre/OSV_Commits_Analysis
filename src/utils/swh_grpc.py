@@ -6,6 +6,7 @@ from google.protobuf.field_mask_pb2 import FieldMask
 
 from typing import List, Iterator
 
+
 class GraphClient(swhgraph_grpc.TraversalServiceStub):
     def __init__(self, host, port):
         self.channel = grpc.insecure_channel("%s:%s" % (host, port))
@@ -28,7 +29,7 @@ class GraphClient(swhgraph_grpc.TraversalServiceStub):
     def __contains__(self, sha: str) -> bool:
         return self.get_node(sha) != ''
 
-    def bfs(self, sha_list: List[str], backwards=False) -> Iterator[str]:
+    def bfs(self, sha_list: List[str], backwards=False, **kwargs) -> Iterator[str]:
         src = ["swh:1:rev:%s" % sha for sha in sha_list if sha in self]
         if src == []:
             return iter(())
@@ -37,7 +38,7 @@ class GraphClient(swhgraph_grpc.TraversalServiceStub):
         else:
             direction = swhgraph.GraphDirection.FORWARD
         nodes = self.Traverse(swhgraph.TraversalRequest(
-                                  src=src, direction=direction, edges="rev:rev", mask=FieldMask(paths=["swhid"])))
+            src=src, direction=direction, edges="rev:rev", mask=FieldMask(paths=["swhid"]), **kwargs))
         return map(lambda n: n.swhid.split(':')[-1], nodes)
 
     def ancestors(self, sha_list: List[str]) -> Iterator[str]:
@@ -45,3 +46,6 @@ class GraphClient(swhgraph_grpc.TraversalServiceStub):
 
     def descendants(self, sha_list: List[str]) -> Iterator[str]:
         return self.bfs(sha_list, True)
+
+    def parents(self, sha):
+        return self.bfs([sha], backwards=True, max_depth=1)
