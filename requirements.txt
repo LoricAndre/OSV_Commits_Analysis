@@ -4,6 +4,7 @@ pandas
 tqdm
 pqdm
 dill
+pytest
 
 multiprocess
 grpcio
