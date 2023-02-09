@@ -10,3 +10,4 @@ multiprocess
 grpcio
 swh.graph
 pyarrow
+sqlalchemy

@@ -1,10 +1,14 @@
 import grpc
+from sqlalchemy.sql import except_
 
 import swh.graph.grpc.swhgraph_pb2 as swhgraph
 import swh.graph.grpc.swhgraph_pb2_grpc as swhgraph_grpc
 from google.protobuf.field_mask_pb2 import FieldMask
 
 from typing import List, Iterator
+
+
+import requests
 
 
 class GraphClient(swhgraph_grpc.TraversalServiceStub):
@@ -21,6 +25,7 @@ class GraphClient(swhgraph_grpc.TraversalServiceStub):
             node = self.GetNode(swhgraph.GetNodeRequest(swhid=swhid))
             return node.swhid.split(':')[3]
         except grpc.RpcError as e:
+            print(e)
             if e.code() == grpc.StatusCode.INVALID_ARGUMENT:
                 return ''
             else:
@@ -41,11 +46,20 @@ class GraphClient(swhgraph_grpc.TraversalServiceStub):
             src=src, direction=direction, edges="rev:rev", mask=FieldMask(paths=["swhid"]), **kwargs))
         return map(lambda n: n.swhid.split(':')[-1], nodes)
 
-    def ancestors(self, sha_list: List[str]) -> Iterator[str]:
-        return self.bfs(sha_list)
+    def ancestors(self, sha_list: List[str], **kwargs) -> Iterator[str]:
+        return self.bfs(sha_list, min_depth=1, **kwargs)
 
-    def descendants(self, sha_list: List[str]) -> Iterator[str]:
-        return self.bfs(sha_list, True)
+    def descendants(self, sha_list: List[str], **kwargs) -> Iterator[str]:
+        return self.bfs(sha_list, True, min_depth=1, **kwargs)
 
     def parents(self, sha):
-        return self.bfs([sha], backwards=True, max_depth=1)
+        return self.ancestors([sha], max_depth=1)
+
+    def topo_sort(self):
+        while True:
+            try:
+                res = requests.get("http://localhost:50093", timeout=1).text
+                yield res.split(':')[3]
+            except requests.exceptions.ReadTimeout:
+                print("[WARN] Timeout when getting topo sort, this should mean that it is done or the server is not running.")
+                break
