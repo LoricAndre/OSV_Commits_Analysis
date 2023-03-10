@@ -1,6 +1,6 @@
 [submodule "swh-graph"]
-	path = swh-graph
-	url = git@github.com:SoftwareHeritage/swh-graph.git
+	path = java/swh-graph
+	url = git@gitlab.softwareheritage.org:swh/devel/swh-graph.git
 [submodule "cmph"]
 	path = cmph
 	url = git@github.com:zvelo/cmph.git
