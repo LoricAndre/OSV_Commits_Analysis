@@ -42,7 +42,7 @@ class Vulnerability {
         new SWHID(String.format("swh:1:rev:%s", fixed_sha));
     this.introduced =
         new SWHID(String.format("swh:1:rev:%s", introduced_sha));
-    this.id = from_db.getString("uid");
+    this.id = from_db.getString("id");
   }
 }
 
