@@ -88,7 +88,7 @@ public class Colorizer {
     colorize();
   }
 
-  void colorize() throws FileNotFoundException {
+  void colorize() throws FileNotFoundException, SQLException {
     TopoSort toposort = new TopoSort(toposort_path);
     Connection db = DriverManager.getConnection(db_url);
     String result_table = "colorized";
@@ -103,8 +103,8 @@ public class Colorizer {
       SWHID swhid = toposort.next();
       long nodeId = graph.getNodeId(swhid);
       HashSet<Vulnerability> introduced_here =
-          introductions.getOrDefault(swhid, []);
-      HashSet<Vulnerability> fixed_here = fixes.getOrDefault(swhid, []);
+          introductions.getOrDefault(swhid, new HashSet<Vulnerability>());
+      HashSet<Vulnerability> fixed_here = fixes.getOrDefault(swhid, new HashSet<Vulnerability>());
       // Add introduced here
       HashSet<Vulnerability> affecting_here = introduced_here;
 
@@ -127,7 +127,7 @@ public class Colorizer {
     }
   }
 
-  void buildVulnsAndFixes() {
+  void buildVulnsAndFixes() throws SQLException {
     Connection db = DriverManager.getConnection(db_url);
     Statement stmt = db.createStatement();
     String vulns_query = "select start, end, id from OSV where type = 'GIT'";
@@ -139,7 +139,7 @@ public class Colorizer {
 
       if (vuln.getFixed() != zero_id) {
         HashSet<Vulnerability> affecting =
-            fixes.getOrDefault(vuln.getFixed(), []);
+            fixes.getOrDefault(vuln.getFixed(), new HashSet<Vulnerability>());
         affecting.add(vuln);
         fixes.put(vuln.getFixed(), affecting);
       }
@@ -148,14 +148,14 @@ public class Colorizer {
   }
 
   void buildIntroductions() throws FileNotFoundException {
-    HashMap<Long, HashSet<Vulnerability>> affecting;
+    HashMap<Long, HashSet<Vulnerability>> affecting = new HashMap<>();
     TopoSort toposort = new TopoSort(transposed_toposort_path);
     while (toposort.hasNext()) {
       SWHID swhid = toposort.next();
       long nodeId = graph.getNodeId(swhid);
       long predecessor = 0;
       HashSet<Vulnerability> affecting_here =
-          affecting.getOrDefault(nodeId, []);
+          affecting.getOrDefault(nodeId, new HashSet<Vulnerability>());
       for (LazyLongIterator predecessors = graph.predecessors(nodeId);
            predecessor != -1; predecessor = predecessors.nextLong()) {
         SWHID predecessor_swhid = graph.getSWHID(predecessor);
@@ -168,7 +168,7 @@ public class Colorizer {
 
       long nbAncestors = graph.indegree(nodeId);
       if (nbAncestors == 0) {
-        HashSet<Vulnerability> introduced_here = introductions.getOrDefault(swhid, []);
+        HashSet<Vulnerability> introduced_here = introductions.getOrDefault(swhid, new HashSet<Vulnerability>());
         introduced_here.addAll(affecting_here);
         introductions.put(swhid, introduced_here);
       } else {
