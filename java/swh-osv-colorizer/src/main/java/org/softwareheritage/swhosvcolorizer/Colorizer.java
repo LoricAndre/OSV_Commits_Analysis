@@ -216,6 +216,7 @@ public class Colorizer {
             introductions.getOrDefault(swhid, new HashSet<Integer>());
         introduced_here.addAll(affecting_here);
         introductions.put(swhid, introduced_here);
+        System.out.println("Found leaf " + swhid.getSWHID());
       } else {
         affecting.put(nodeId, affecting_here);
       }
