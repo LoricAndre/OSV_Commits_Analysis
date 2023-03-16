@@ -148,7 +148,7 @@ public class Colorizer {
         statement.addBatch();
       }
       statement.executeBatch();
-      System.out.println("\r Node: " + (i++));
+      System.out.print("\r Node: " + (i++));
     }
   }
 
@@ -211,7 +211,7 @@ public class Colorizer {
       } else {
         affecting.put(nodeId, affecting_here);
       }
-      System.out.println("\r Node: " + (i++));
+      System.out.print("\r Node: " + (i++));
     }
     System.out.println("Done.");
   }
