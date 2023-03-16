@@ -195,8 +195,8 @@ public class Colorizer {
         }
       }
 
-      long nbAncestors = graph.indegree(nodeId);
-      if (nbAncestors == 0) {
+      long nbSuccessors = graph.outdegree(nodeId);
+      if (nbSuccessors == 0) {
         HashSet<Vulnerability> introduced_here =
             introductions.getOrDefault(swhid, new HashSet<Vulnerability>());
         introduced_here.addAll(affecting_here);
