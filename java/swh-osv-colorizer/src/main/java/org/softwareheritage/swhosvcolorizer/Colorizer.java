@@ -182,12 +182,13 @@ public class Colorizer {
     while (toposort.hasNext()) {
       SWHID swhid = toposort.next();
       long nodeId = graph.getNodeId(swhid);
-      long predecessor = 0;
       HashSet<Vulnerability> affecting_here =
           affecting.getOrDefault(nodeId, new HashSet<Vulnerability>());
+      long predecessor = 0;
       for (LazyLongIterator predecessors = graph.predecessors(nodeId);
            predecessor != -1; predecessor = predecessors.nextLong()) {
         SWHID predecessor_swhid = graph.getSWHID(predecessor);
+        System.out.println(predecessor_swhid);
         for (Vulnerability predecessor_vuln : affecting.get(predecessor)) {
           if (predecessor_vuln.getIntroduced() != predecessor_swhid) {
             affecting_here.add(predecessor_vuln);
