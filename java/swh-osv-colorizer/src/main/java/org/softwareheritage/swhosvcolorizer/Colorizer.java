@@ -74,7 +74,7 @@ public class Colorizer {
   HashMap<SWHID, HashSet<Vulnerability>> introductions =
       new HashMap<SWHID, HashSet<Vulnerability>>();
 
-  SWHID zero_id = new SWHID(String.format("swh:1:rev:%s1$" + SWHID.HASH_LENGTH + "s", "").replace(' ', '0'));
+  SWHID zero_id = new SWHID(String.format("swh:1:rev:%1$" + SWHID.HASH_LENGTH + "s", "").replace(' ', '0'));
 
   HashSet<Vulnerability> vulns;
 
