@@ -81,7 +81,7 @@
           <artifactId>exec-maven-plugin</artifactId>
           <version>3.0.0</version>
           <configuration>
-              <mainClass>org.softwareheritage.swhosvcolorizer.App</mainClass>
+              <mainClass>org.softwareheritage.swhosvcolorizer.Colorizer</mainClass>
           </configuration>
         </plugin>
       </plugins>
