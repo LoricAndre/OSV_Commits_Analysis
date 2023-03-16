@@ -188,6 +188,9 @@ public class Colorizer {
       for (LazyLongIterator predecessors = graph.predecessors(nodeId);
            predecessor != -1; predecessor = predecessors.nextLong()) {
         SWHID predecessor_swhid = graph.getSWHID(predecessor);
+        if (predecessor_swhid.getType() != SwhType.REV) {
+          continue;
+        }
         System.out.println(predecessor_swhid);
         for (Vulnerability predecessor_vuln : affecting.get(predecessor)) {
           if (predecessor_vuln.getIntroduced() != predecessor_swhid) {
