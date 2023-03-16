@@ -195,13 +195,22 @@ public class Colorizer {
           continue;
         }
         for (Integer predecessor_vuln_i : affecting.get(predecessor)) {
-          if (vulnerabilities.get(predecessor_vuln_i).getIntroduced() != predecessor_swhid) {
+          if (vulnerabilities.get(predecessor_vuln_i).getIntroduced() !=
+              predecessor_swhid) {
             affecting_here.add(predecessor_vuln_i);
           }
         }
       }
 
-      long nbSuccessors = graph.outdegree(nodeId);
+      long nbSuccessors = 0;
+      long successor = 0;
+      for (LazyLongIterator successors = graph.successors(nodeId);
+           successor != -1; successor = successors.nextLong()) {
+        SWHID successor_swhid = graph.getSWHID(successor);
+        if (successor_swhid.getType() == SwhType.REV) {
+          nbSuccessors++;
+        }
+      }
       if (nbSuccessors == 0) {
         HashSet<Integer> introduced_here =
             introductions.getOrDefault(swhid, new HashSet<Integer>());
