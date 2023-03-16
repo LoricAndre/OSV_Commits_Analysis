@@ -76,7 +76,7 @@ public class Colorizer {
 
   SWHID zero_id = new SWHID(String.format("swh:1:rev:%1$" + SWHID.HASH_LENGTH + "s", "").replace(' ', '0'));
 
-  HashSet<Vulnerability> vulns;
+  HashSet<Vulnerability> vulns = new HashSet<>();
 
   String toposort_path;
   String transposed_toposort_path;
