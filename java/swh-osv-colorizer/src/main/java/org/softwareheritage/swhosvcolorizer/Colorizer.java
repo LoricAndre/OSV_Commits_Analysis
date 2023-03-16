@@ -181,7 +181,8 @@ public class Colorizer {
     System.out.println("Computing introduction commits...");
     HashMap<Long, HashSet<Integer>> affecting = new HashMap<>();
     TopoSort toposort = new TopoSort(transposed_toposort_path);
-    long i = 0;
+    long nodes = 0;
+    long leaves = 0;
     while (toposort.hasNext()) {
       SWHID swhid = toposort.next();
       long nodeId = graph.getNodeId(swhid);
@@ -216,11 +217,11 @@ public class Colorizer {
             introductions.getOrDefault(swhid, new HashSet<Integer>());
         introduced_here.addAll(affecting_here);
         introductions.put(swhid, introduced_here);
-        System.out.println("Found leaf " + swhid.getSWHID());
+        leaves++;
       } else {
         affecting.put(nodeId, affecting_here);
       }
-      System.out.print("\r Node: " + (i++));
+      System.out.print("\r Node: " + (nodes++) + ", leaves : " + leaves);
     }
     System.out.println("Done.");
   }
