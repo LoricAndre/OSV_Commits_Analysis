@@ -59,8 +59,7 @@ class TopoSort {
 public class Colorizer {
   Subgraph graph;
 
-  HashMap<SWHID, HashSet<Vulnerability>> computed =
-      new HashMap<>();
+  HashMap<SWHID, HashSet<Vulnerability>> computed = new HashMap<>();
   HashMap<SWHID, HashSet<Vulnerability>> fixes =
       new HashMap<SWHID, HashSet<Vulnerability>>();
   HashMap<SWHID, HashSet<Vulnerability>> introductions =
@@ -75,17 +74,29 @@ public class Colorizer {
   String graph_path;
   String db_url;
 
-  public Colorizer(String[] args) throws IOException, ClassNotFoundException,
-                                         FileNotFoundException, SQLException {
-    graph_path = args[0];
+  public static void main(String[] args)
+      throws IOException, ClassNotFoundException, FileNotFoundException,
+             SQLException {
+    String graph_path = args[0];
     String db_path = args[1];
-    toposort_path = args[2];
-    transposed_toposort_path = args[3];
+    String toposort_path = args[2];
+    String transposed_toposort_path = args[3];
+    Colorizer c = new Colorizer(graph_path, db_path, toposort_path,
+                                transposed_toposort_path);
+    c.colorize();
+  }
+
+  public Colorizer(String graph_path, String db_path, String toposort_path,
+                   String transposed_toposort_path)
+      throws IOException, ClassNotFoundException, FileNotFoundException,
+             SQLException {
+    this.graph_path = graph_path;
+    this.toposort_path = toposort_path;
+    this.transposed_toposort_path = transposed_toposort_path;
     db_url = String.format("jdbc:sqlite:%s", db_path);
     loadGraph();
     buildVulnsAndFixes();
     buildIntroductions();
-    colorize();
   }
 
   void colorize() throws FileNotFoundException, SQLException {
@@ -93,18 +104,20 @@ public class Colorizer {
     Connection db = DriverManager.getConnection(db_url);
     String result_table = "colorized";
     // Create table
-    String create_query = "CREATE TABLE IF NOT EXISTS " + result_table
-            + "(sha, uid)";
+    String create_query =
+        "CREATE TABLE IF NOT EXISTS " + result_table + "(sha, uid)";
     Statement stmt = db.createStatement();
     stmt.executeQuery(create_query);
-    String insert_query = String.format("insert into %s values (?, ?)", result_table);
+    String insert_query =
+        String.format("insert into %s values (?, ?)", result_table);
     PreparedStatement statement = db.prepareStatement(insert_query);
     while (toposort.hasNext()) {
       SWHID swhid = toposort.next();
       long nodeId = graph.getNodeId(swhid);
       HashSet<Vulnerability> introduced_here =
           introductions.getOrDefault(swhid, new HashSet<Vulnerability>());
-      HashSet<Vulnerability> fixed_here = fixes.getOrDefault(swhid, new HashSet<Vulnerability>());
+      HashSet<Vulnerability> fixed_here =
+          fixes.getOrDefault(swhid, new HashSet<Vulnerability>());
       // Add introduced here
       HashSet<Vulnerability> affecting_here = introduced_here;
 
@@ -118,7 +131,7 @@ public class Colorizer {
       // Remove fixes
       affecting_here.removeAll(fixed_here);
       computed.put(swhid, affecting_here);
-      for (Vulnerability vuln: affecting_here) {
+      for (Vulnerability vuln : affecting_here) {
         statement.setString(1, vuln.getId());
         statement.setString(2, swhid.getSWHID());
         statement.addBatch();
@@ -128,11 +141,16 @@ public class Colorizer {
   }
 
   void buildVulnsAndFixes() throws SQLException {
+    System.out.println("Connecting to database at " + db_url + " ...");
     Connection db = DriverManager.getConnection(db_url);
+    System.out.println("Connected.");
+    System.out.println("Fetching vulnerabilities from database...");
     Statement stmt = db.createStatement();
     String vulns_query = "select start, end, id from OSV where type = 'GIT'";
     ResultSet raw_vulns = stmt.executeQuery(vulns_query);
+    System.out.println("Done.");
 
+    System.out.println("Storing vulnerabilities and fix commits...");
     while (raw_vulns.next()) {
       Vulnerability vuln = new Vulnerability(raw_vulns);
       vulns.add(vuln);
@@ -145,9 +163,11 @@ public class Colorizer {
       }
     }
     db.close();
+    System.out.println("Done.");
   }
 
   void buildIntroductions() throws FileNotFoundException {
+    System.out.println("Computing introduction commits...");
     HashMap<Long, HashSet<Vulnerability>> affecting = new HashMap<>();
     TopoSort toposort = new TopoSort(transposed_toposort_path);
     while (toposort.hasNext()) {
@@ -168,18 +188,21 @@ public class Colorizer {
 
       long nbAncestors = graph.indegree(nodeId);
       if (nbAncestors == 0) {
-        HashSet<Vulnerability> introduced_here = introductions.getOrDefault(swhid, new HashSet<Vulnerability>());
+        HashSet<Vulnerability> introduced_here =
+            introductions.getOrDefault(swhid, new HashSet<Vulnerability>());
         introduced_here.addAll(affecting_here);
         introductions.put(swhid, introduced_here);
       } else {
         affecting.put(nodeId, affecting_here);
       }
     }
+    System.out.println("Done.");
   }
 
   void loadGraph() throws IOException {
-    System.err.println("loading graph " + graph_path + " ...");
+    System.out.println("Loading graph " + graph_path + " ...");
     SwhBidirectionalGraph loaded = SwhBidirectionalGraph.loadMapped(graph_path);
     graph = new Subgraph(loaded, new AllowedNodes("rev"));
+    System.out.println("Graph loaded.");
   }
 }
