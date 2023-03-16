@@ -29,10 +29,19 @@ class Vulnerability {
   public void setId(String id) { this.id = id; }
 
   public Vulnerability(ResultSet from_db) throws SQLException {
+    String introduced_sha = from_db.getString("start");
+    String fixed_sha = from_db.getString("end");
+    int length = SWHID.HASH_LENGTH;
+    if (fixed_sha == "0") {
+      fixed_sha = String.format("%1$" + length + "s", "").replace(' ', '0');
+    }
+    if (introduced_sha == "0") {
+      introduced_sha = String.format("%1$" + length + "s", "").replace(' ', '0');
+    }
     this.fixed =
-        new SWHID(String.format("swh:1:rev:%s", from_db.getString("end")));
+        new SWHID(String.format("swh:1:rev:%s", fixed_sha));
     this.introduced =
-        new SWHID(String.format("swh:1:rev:%s", from_db.getString("start")));
+        new SWHID(String.format("swh:1:rev:%s", introduced_sha));
     this.id = from_db.getString("uid");
   }
 }
@@ -65,7 +74,7 @@ public class Colorizer {
   HashMap<SWHID, HashSet<Vulnerability>> introductions =
       new HashMap<SWHID, HashSet<Vulnerability>>();
 
-  SWHID zero_id = new SWHID("swh:1:rev:0");
+  SWHID zero_id = new SWHID(String.format("swh:1:rev:%s1$" + SWHID.HASH_LENGTH + "s", "").replace(' ', '0'));
 
   HashSet<Vulnerability> vulns;
 
@@ -126,7 +135,7 @@ public class Colorizer {
       for (LazyLongIterator successors = graph.successors(nodeId);
            successor != -1; successor = successors.nextLong()) {
         SWHID successor_swhid = graph.getSWHID(successor);
-        affecting_here.addAll(computed.get(successor));
+        affecting_here.addAll(computed.get(successor_swhid));
       }
       // Remove fixes
       affecting_here.removeAll(fixed_here);
