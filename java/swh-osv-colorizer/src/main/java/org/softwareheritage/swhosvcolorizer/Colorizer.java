@@ -66,17 +66,15 @@ class TopoSort {
 public class Colorizer {
   Subgraph graph;
 
-  HashMap<SWHID, HashSet<Vulnerability>> computed = new HashMap<>();
-  HashMap<SWHID, HashSet<Vulnerability>> fixes =
-      new HashMap<SWHID, HashSet<Vulnerability>>();
-  HashMap<SWHID, HashSet<Vulnerability>> introductions =
-      new HashMap<SWHID, HashSet<Vulnerability>>();
+  HashMap<SWHID, HashSet<Integer>> computed = new HashMap<>();
+  HashMap<SWHID, HashSet<Integer>> fixes = new HashMap<>();
+  HashMap<SWHID, HashSet<Integer>> introductions = new HashMap<>();
 
   SWHID zero_id =
       new SWHID(String.format("swh:1:rev:%1$" + SWHID.HASH_LENGTH + "s", "")
                     .replace(' ', '0'));
 
-  HashSet<Vulnerability> vulns = new HashSet<>();
+  ArrayList<Vulnerability> vulnerabilities = new ArrayList<>();
 
   String toposort_path;
   String transposed_toposort_path;
@@ -125,12 +123,12 @@ public class Colorizer {
     while (toposort.hasNext()) {
       SWHID swhid = toposort.next();
       long nodeId = graph.getNodeId(swhid);
-      HashSet<Vulnerability> introduced_here =
-          introductions.getOrDefault(swhid, new HashSet<Vulnerability>());
-      HashSet<Vulnerability> fixed_here =
-          fixes.getOrDefault(swhid, new HashSet<Vulnerability>());
+      HashSet<Integer> introduced_here =
+          introductions.getOrDefault(swhid, new HashSet<Integer>());
+      HashSet<Integer> fixed_here =
+          fixes.getOrDefault(swhid, new HashSet<Integer>());
       // Add introduced here
-      HashSet<Vulnerability> affecting_here = introduced_here;
+      HashSet<Integer> affecting_here = introduced_here;
 
       // Add parent vulns
       long successor = 0;
@@ -142,8 +140,8 @@ public class Colorizer {
       // Remove fixes
       affecting_here.removeAll(fixed_here);
       computed.put(swhid, affecting_here);
-      for (Vulnerability vuln : affecting_here) {
-        statement.setString(1, vuln.getId());
+      for (Integer vuln_i : affecting_here) {
+        statement.setString(1, vulnerabilities.get(vuln_i).getId());
         statement.setString(2, swhid.getSWHID());
         statement.addBatch();
       }
@@ -165,12 +163,13 @@ public class Colorizer {
     System.out.println("Storing vulnerabilities and fix commits...");
     while (raw_vulns.next()) {
       Vulnerability vuln = new Vulnerability(raw_vulns);
-      vulns.add(vuln);
+      Integer vuln_i = vulnerabilities.size();
+      vulnerabilities.add(vuln);
 
       if (vuln.getFixed() != zero_id) {
-        HashSet<Vulnerability> affecting =
-            fixes.getOrDefault(vuln.getFixed(), new HashSet<Vulnerability>());
-        affecting.add(vuln);
+        HashSet<Integer> affecting =
+            fixes.getOrDefault(vuln.getFixed(), new HashSet<Integer>());
+        affecting.add(vuln_i);
         fixes.put(vuln.getFixed(), affecting);
       }
     }
@@ -180,14 +179,14 @@ public class Colorizer {
 
   void buildIntroductions() throws FileNotFoundException {
     System.out.println("Computing introduction commits...");
-    HashMap<Long, HashSet<Vulnerability>> affecting = new HashMap<>();
+    HashMap<Long, HashSet<Integer>> affecting = new HashMap<>();
     TopoSort toposort = new TopoSort(transposed_toposort_path);
     long i = 0;
     while (toposort.hasNext()) {
       SWHID swhid = toposort.next();
       long nodeId = graph.getNodeId(swhid);
-      HashSet<Vulnerability> affecting_here =
-          affecting.getOrDefault(nodeId, new HashSet<Vulnerability>());
+      HashSet<Integer> affecting_here =
+          affecting.getOrDefault(nodeId, new HashSet<Integer>());
       long predecessor = 0;
       for (LazyLongIterator predecessors = graph.predecessors(nodeId);
            predecessor != -1; predecessor = predecessors.nextLong()) {
@@ -195,17 +194,17 @@ public class Colorizer {
         if (predecessor_swhid.getType() != SwhType.REV) {
           continue;
         }
-        for (Vulnerability predecessor_vuln : affecting.get(predecessor)) {
-          if (predecessor_vuln.getIntroduced() != predecessor_swhid) {
-            affecting_here.add(predecessor_vuln);
+        for (Integer predecessor_vuln_i : affecting.get(predecessor)) {
+          if (vulnerabilities.get(predecessor_vuln_i).getIntroduced() != predecessor_swhid) {
+            affecting_here.add(predecessor_vuln_i);
           }
         }
       }
 
       long nbSuccessors = graph.outdegree(nodeId);
       if (nbSuccessors == 0) {
-        HashSet<Vulnerability> introduced_here =
-            introductions.getOrDefault(swhid, new HashSet<Vulnerability>());
+        HashSet<Integer> introduced_here =
+            introductions.getOrDefault(swhid, new HashSet<Integer>());
         introduced_here.addAll(affecting_here);
         introductions.put(swhid, introduced_here);
       } else {
