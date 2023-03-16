@@ -191,7 +191,6 @@ public class Colorizer {
         if (predecessor_swhid.getType() != SwhType.REV) {
           continue;
         }
-        System.out.println(predecessor_swhid);
         for (Vulnerability predecessor_vuln : affecting.get(predecessor)) {
           if (predecessor_vuln.getIntroduced() != predecessor_swhid) {
             affecting_here.add(predecessor_vuln);
