@@ -120,6 +120,8 @@ public class Colorizer {
     String insert_query =
         String.format("insert into %s values (?, ?)", result_table);
     PreparedStatement statement = db.prepareStatement(insert_query);
+    long i = 0;
+    System.out.println("Coloring the graph...");
     while (toposort.hasNext()) {
       SWHID swhid = toposort.next();
       long nodeId = graph.getNodeId(swhid);
@@ -146,6 +148,7 @@ public class Colorizer {
         statement.addBatch();
       }
       statement.executeBatch();
+      System.out.println("\r Node: " + (i++));
     }
   }
 
@@ -179,6 +182,7 @@ public class Colorizer {
     System.out.println("Computing introduction commits...");
     HashMap<Long, HashSet<Vulnerability>> affecting = new HashMap<>();
     TopoSort toposort = new TopoSort(transposed_toposort_path);
+    long i = 0;
     while (toposort.hasNext()) {
       SWHID swhid = toposort.next();
       long nodeId = graph.getNodeId(swhid);
@@ -207,6 +211,7 @@ public class Colorizer {
       } else {
         affecting.put(nodeId, affecting_here);
       }
+      System.out.println("\r Node: " + (i++));
     }
     System.out.println("Done.");
   }
