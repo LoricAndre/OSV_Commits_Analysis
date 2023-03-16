@@ -32,12 +32,14 @@ class Vulnerability {
     String introduced_sha = from_db.getString("start");
     String fixed_sha = from_db.getString("end");
     int length = SWHID.HASH_LENGTH;
-    fixed_sha = String.format("%1$" + length + "s", introduced_sha).replace(' ', '0');
-    introduced_sha = String.format("%1$" + length + "s", introduced_sha).replace(' ', '0');
-    this.fixed =
-        new SWHID(String.format("swh:1:rev:%s", fixed_sha));
-    this.introduced =
-        new SWHID(String.format("swh:1:rev:%s", introduced_sha));
+    fixed_sha = String.format("%1$" + length + "s", fixed_sha)
+                    .replace(' ', '0')
+                    .replaceFirst("unknown:", "");
+    introduced_sha = String.format("%1$" + length + "s", introduced_sha)
+                         .replace(' ', '0')
+                         .replaceFirst("unknown:", "");
+    this.fixed = new SWHID(String.format("swh:1:rev:%s", fixed_sha));
+    this.introduced = new SWHID(String.format("swh:1:rev:%s", introduced_sha));
     this.id = from_db.getString("id");
   }
 }
@@ -70,7 +72,9 @@ public class Colorizer {
   HashMap<SWHID, HashSet<Vulnerability>> introductions =
       new HashMap<SWHID, HashSet<Vulnerability>>();
 
-  SWHID zero_id = new SWHID(String.format("swh:1:rev:%1$" + SWHID.HASH_LENGTH + "s", "").replace(' ', '0'));
+  SWHID zero_id =
+      new SWHID(String.format("swh:1:rev:%1$" + SWHID.HASH_LENGTH + "s", "")
+                    .replace(' ', '0'));
 
   HashSet<Vulnerability> vulns = new HashSet<>();
 
