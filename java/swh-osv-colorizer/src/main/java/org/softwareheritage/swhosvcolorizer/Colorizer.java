@@ -32,12 +32,8 @@ class Vulnerability {
     String introduced_sha = from_db.getString("start");
     String fixed_sha = from_db.getString("end");
     int length = SWHID.HASH_LENGTH;
-    if (fixed_sha == "0") {
-      fixed_sha = String.format("%1$" + length + "s", "").replace(' ', '0');
-    }
-    if (introduced_sha == "0") {
-      introduced_sha = String.format("%1$" + length + "s", "").replace(' ', '0');
-    }
+    fixed_sha = String.format("%1$" + length + "s", introduced_sha).replace(' ', '0');
+    introduced_sha = String.format("%1$" + length + "s", introduced_sha).replace(' ', '0');
     this.fixed =
         new SWHID(String.format("swh:1:rev:%s", fixed_sha));
     this.introduced =
