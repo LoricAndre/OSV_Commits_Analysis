@@ -34,10 +34,10 @@ class Vulnerability {
     int length = SWHID.HASH_LENGTH;
     fixed_sha = String.format("%1$" + length + "s", fixed_sha)
                     .replace(' ', '0')
-                    .replaceFirst("unknown:", "");
+                    .replaceFirst(".*:", "");
     introduced_sha = String.format("%1$" + length + "s", introduced_sha)
                          .replace(' ', '0')
-                         .replaceFirst("unknown:", "");
+                         .replaceFirst(".*:", "");
     this.fixed = new SWHID(String.format("swh:1:rev:%s", fixed_sha));
     this.introduced = new SWHID(String.format("swh:1:rev:%s", introduced_sha));
     this.id = from_db.getString("id");
