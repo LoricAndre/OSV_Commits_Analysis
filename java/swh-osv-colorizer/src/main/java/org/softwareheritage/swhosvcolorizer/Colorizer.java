@@ -9,6 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import java.util.Map.Entry;
+
 import org.softwareheritage.graph.*;
 
 class Vulnerability {
@@ -103,7 +105,8 @@ public class Colorizer {
     db_url = String.format("jdbc:sqlite:%s", db_path);
     loadGraph();
     buildVulnsAndFixes();
-    buildIntroductions();
+    // buildIntroductions();
+    buildClosedIntroductions();
   }
 
   void colorize() throws FileNotFoundException, SQLException {
@@ -116,7 +119,7 @@ public class Colorizer {
     Statement stmt = db.createStatement();
     stmt.executeQuery(create_query);
     String insert_query =
-        String.format("insert into %s values (?, ?)", result_table);
+        String.format("insert or replace into %s values (?, ?)", result_table);
     PreparedStatement statement = db.prepareStatement(insert_query);
     long i = 0;
     System.out.println("Coloring the graph...");
@@ -175,6 +178,18 @@ public class Colorizer {
     }
     db.close();
     System.out.println("Done.");
+  }
+
+  void buildClosedIntroductions() {
+    for (Integer i = 0; i < vulnerabilities.size(); i++) {
+      Vulnerability vuln = vulnerabilities.get(i);
+      if (vuln.getIntroduced() != zero_id) {
+        HashSet<Integer> affecting =
+            introductions.getOrDefault(vuln.getIntroduced(), new HashSet<Integer>());
+        affecting.add(i);
+        introductions.put(vuln.getIntroduced(), affecting);
+      }
+    }
   }
 
   void buildIntroductions() throws FileNotFoundException {
